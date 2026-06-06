@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_theme.dart';
 import '../../app/widgets/hirehub_logo.dart';
+import '../dashboard/job_dashboard_view.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -48,7 +48,13 @@ class _SplashViewState extends State<SplashView>
 
     // Navigate after animation settles
     Future.delayed(const Duration(milliseconds: 2400), () {
-      if (mounted) Get.offNamed(AppRoutes.dashboard);
+      if (mounted) {
+        Get.off(
+          () => const JobDashboardView(),
+          transition: Transition.fadeIn,
+          duration: const Duration(milliseconds: 500),
+        );
+      }
     });
   }
 
@@ -101,7 +107,7 @@ class _SplashViewState extends State<SplashView>
                     opacity: _fadeAnim.value,
                     child: Transform.scale(
                       scale: _scaleAnim.value,
-                      child: const HireHubLogo(size: 88, showLabel: false),
+                      child: const HireHubLogo(size: 88),
                     ),
                   ),
                 ),

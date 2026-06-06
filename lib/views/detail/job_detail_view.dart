@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
@@ -426,39 +427,59 @@ class _ApplyBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.of(context).padding.bottom;
-    return Container(
-      padding: EdgeInsets.fromLTRB(20, 12, 20, bottom + 12),
-      decoration: const BoxDecoration(
-        color: AppTheme.surface,
-        border: Border(
-          top: BorderSide(color: AppTheme.border, width: 1),
-        ),
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: _launch,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.accent,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 15),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+        child: Container(
+          padding: EdgeInsets.fromLTRB(20, 14, 20, bottom + 14),
+          decoration: BoxDecoration(
+            color: AppTheme.surface.withValues(alpha: 0.72),
+            border: Border(
+              top: BorderSide(
+                color: Colors.white.withValues(alpha: 0.08),
+                width: 1,
+              ),
             ),
-            elevation: 0,
-            shadowColor: Colors.transparent,
-          ).copyWith(
-            // Only the CTA gets a glow
-            shadowColor: WidgetStatePropertyAll(
-              AppTheme.accent.withValues(alpha: 0.35),
-            ),
-            elevation: const WidgetStatePropertyAll(8),
           ),
-          child: const Text(
-            'Apply Now',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
+          child: SizedBox(
+            width: double.infinity,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF7B8FFF), Color(0xFF5B6EF5)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.accent.withValues(alpha: 0.38),
+                    blurRadius: 20,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: ElevatedButton.icon(
+                onPressed: _launch,
+                icon: const Icon(Icons.open_in_new_rounded, size: 17),
+                label: const Text('Apply Now'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  shadowColor: Colors.transparent,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
             ),
           ),
         ),

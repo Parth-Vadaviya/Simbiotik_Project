@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'app/routes/app_routes.dart';
 import 'app/theme/app_theme.dart';
+import 'views/splash/splash_view.dart';
 
 void main() {
   runApp(const HireHubApp());
@@ -16,7 +17,7 @@ class HireHubApp extends StatelessWidget {
       title: 'HireHub',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
-      initialRoute: AppRoutes.splash,
+      home: const SplashView(),
       getPages: appPages,
     );
   }

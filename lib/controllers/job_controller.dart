@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/job_model.dart';
 import '../services/job_service.dart';
 
@@ -6,10 +7,11 @@ enum FeedStatus { idle, loading, success, error }
 
 enum FeedFilter { all, bookmarked }
 
+const _kBookmarksKey = 'hirehub_bookmarks';
+
 class JobController extends GetxController {
   final JobService _service = JobService();
 
-  // Observable state
   final _status = FeedStatus.idle.obs;
   final _allJobs = <JobModel>[].obs;
   final _filteredJobs = <JobModel>[].obs;
@@ -18,21 +20,39 @@ class JobController extends GetxController {
   final _activeFilter = FeedFilter.all.obs;
   String _errorMessage = '';
 
-  // Getters
   FeedStatus get status => _status.value;
   List<JobModel> get jobs => _filteredJobs;
   String get errorMessage => _errorMessage;
   FeedFilter get activeFilter => _activeFilter.value;
+  int get bookmarkCount => _bookmarkedUrls.length;
+  int get allJobCount => _allJobs.length;
 
   @override
   void onInit() {
     super.onInit();
-    fetchJobs();
+    _loadBookmarks().then((_) => fetchJobs());
     ever(_searchQuery, (_) => _applyFilter());
     ever(_activeFilter, (_) => _applyFilter());
-    // Re-apply filter when bookmarks change so bookmarked view stays fresh
-    ever(_bookmarkedUrls, (_) => _applyFilter());
+    ever(_bookmarkedUrls, (_) {
+      _applyFilter();
+      _saveBookmarks();
+    });
   }
+
+  // ── Persistence ────────────────────────────────────────────────────────────
+
+  Future<void> _loadBookmarks() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getStringList(_kBookmarksKey) ?? [];
+    _bookmarkedUrls.addAll(saved.toSet());
+  }
+
+  Future<void> _saveBookmarks() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_kBookmarksKey, _bookmarkedUrls.toList());
+  }
+
+  // ── Network ────────────────────────────────────────────────────────────────
 
   Future<void> fetchJobs() async {
     _status.value = FeedStatus.loading;
@@ -48,25 +68,18 @@ class JobController extends GetxController {
     }
   }
 
-  void search(String query) {
-    _searchQuery.value = query.trim().toLowerCase();
-  }
+  // ── Filters ────────────────────────────────────────────────────────────────
 
-  void setFilter(FeedFilter filter) {
-    _activeFilter.value = filter;
-  }
+  void search(String query) => _searchQuery.value = query.trim().toLowerCase();
+
+  void setFilter(FeedFilter filter) => _activeFilter.value = filter;
 
   void _applyFilter() {
-    final q = _searchQuery.value;
-
     Iterable<JobModel> base = _allJobs;
-
-    // Bookmarked filter
     if (_activeFilter.value == FeedFilter.bookmarked) {
       base = base.where((j) => _bookmarkedUrls.contains(j.url));
     }
-
-    // Search filter
+    final q = _searchQuery.value;
     if (q.isNotEmpty) {
       base = base.where(
         (j) =>
@@ -74,9 +87,10 @@ class JobController extends GetxController {
             j.companyName.toLowerCase().contains(q),
       );
     }
-
     _filteredJobs.assignAll(base);
   }
+
+  // ── Bookmarks ──────────────────────────────────────────────────────────────
 
   void toggleBookmark(String url) {
     if (_bookmarkedUrls.contains(url)) {
@@ -87,6 +101,4 @@ class JobController extends GetxController {
   }
 
   bool isBookmarked(String url) => _bookmarkedUrls.contains(url);
-  int get bookmarkCount => _bookmarkedUrls.length;
-  int get allJobCount => _allJobs.length;
 }

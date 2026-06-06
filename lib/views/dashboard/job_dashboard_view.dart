@@ -5,6 +5,7 @@ import '../../app/theme/app_theme.dart';
 import '../../app/widgets/hirehub_logo.dart';
 import '../../controllers/job_controller.dart';
 import 'widgets/job_card.dart';
+import 'widgets/job_card_skeleton.dart';
 
 class JobDashboardView extends StatelessWidget {
   const JobDashboardView({super.key});
@@ -47,19 +48,11 @@ class _Header extends StatelessWidget {
         children: [
           Row(
             children: [
-              const HireHubLogo(size: 36),
-              const SizedBox(width: 12),
+              const HireHubLogo(size: 36),              const SizedBox(width: 12),
               const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Good Morning 👋',
-                    style: TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
+                  _Greeting(),
                   Text(
                     'Find your next role',
                     style: TextStyle(
@@ -103,6 +96,31 @@ class _Header extends StatelessWidget {
             );
           }),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Greeting ────────────────────────────────────────────────────────────────
+
+class _Greeting extends StatelessWidget {
+  const _Greeting();
+
+  String get _greetingText {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good Morning 👋';
+    if (hour < 17) return 'Good Afternoon 👋';
+    return 'Good Evening 👋';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      _greetingText,
+      style: const TextStyle(
+        color: AppTheme.textSecondary,
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
       ),
     );
   }
@@ -253,7 +271,7 @@ class _JobFeed extends StatelessWidget {
     return Obx(() {
       switch (controller.status) {
         case FeedStatus.loading:
-          return const _LoadingState();
+          return const SkeletonList();
         case FeedStatus.error:
           return _ErrorState(
             message: controller.errorMessage,
@@ -270,29 +288,6 @@ class _JobFeed extends StatelessWidget {
           return const SizedBox.shrink();
       }
     });
-  }
-}
-
-class _LoadingState extends StatelessWidget {
-  const _LoadingState();
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircularProgressIndicator(
-            color: AppTheme.accent,
-            strokeWidth: 2,
-          ),
-          SizedBox(height: 16),
-          Text(
-            'Loading jobs...',
-            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-          ),
-        ],
-      ),
-    );
   }
 }
 
